@@ -83,6 +83,11 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid v
 .btn.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
 .btn.viper{background:var(--viper);color:#fff}
 .hint{color:var(--muted);font-size:.9rem;margin:8px 0 0}
+details.card>summary{cursor:pointer;font-weight:600;list-style-position:inside}
+.score-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#enter input,#enter select{box-sizing:border-box;min-width:0;max-width:100%}
+#e-status.ok{color:var(--win)} #e-status.err{color:var(--loss)}
+.link{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:.85rem;cursor:pointer;margin-top:10px}
 textarea#summary{min-height:300px;font-size:.95rem;line-height:1.45}
 textarea#import{min-height:140px;font-size:.85rem}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
@@ -112,6 +117,22 @@ textarea#import{min-height:140px;font-size:.85rem}
   </section>
 
   <section id="tab-matches" hidden>
+    <details class="card" id="enter">
+      <summary>Eredmény beírása</summary>
+      <p class="hint">Ha a bajnokság oldalán még nincs fent. Csillaggal jelenik meg, és a hivatalos eredmény felülírja, amint megjelenik.</p>
+      <div id="e-form">
+        <label for="e-match">Meccs</label><select id="e-match"></select>
+        <div class="score-row">
+          <div><label for="e-us">Mi (Redvipers)</label><input id="e-us" type="number" min="0" max="99" inputmode="numeric"></div>
+          <div><label for="e-them">Ellenfél</label><input id="e-them" type="number" min="0" max="99" inputmode="numeric"></div>
+        </div>
+        <div id="e-token-box"><label for="e-token">Beírási kulcs</label><input id="e-token" type="password" autocomplete="off" spellcheck="false">
+          <p class="hint">Csak egyszer kell megadni ezen a telefonon, utána megjegyzi. A kulcsot a csapat adminjától kapod.</p></div>
+        <button class="btn viper" id="e-send">Beküldés</button>
+      </div>
+      <p class="hint" id="e-status" role="status"></p>
+      <button class="link" id="e-forget" hidden>Kulcs törlése erről a telefonról</button>
+    </details>
     <div class="card">
       <div class="filter"><input type="checkbox" id="only-ours" checked><label for="only-ours" style="margin:0;color:var(--ink)">Csak a mi meccseink</label></div>
       <div id="match-list"></div>
@@ -188,6 +209,35 @@ textarea#import{min-height:140px;font-size:.85rem}
     L.push('');L.push('Élő tabella: '+location.href.split('#')[0]);
     return L.join('\n');}
 
+  // --- Kézi eredmény beküldése: elindítja a GitHub workflow-t a néző saját kulcsával ---
+  var TK='rv_token';
+  function getTok(){try{return localStorage.getItem(TK)||'';}catch(e){return '';}}
+  function setTok(t){try{if(t)localStorage.setItem(TK,t);else localStorage.removeItem(TK);}catch(e){}}
+  function eStatus(t,c){var el=$('e-status');el.textContent=t;el.className='hint'+(c?' '+c:'');}
+  function renderEnter(){var now=new Date(),sel=$('e-match');
+    var list=S.matches.filter(function(m){var d=toDate(m.dt);return isOurs(m)&&(!played(m)||m.manual)&&d&&d<=now;}).sort(function(a,b){return toDate(b.dt)-toDate(a.dt);});
+    if(!list.length){$('e-form').hidden=true;eStatus('Most nincs beírható meccs: a lejátszott meccseink eredménye már fent van.');}
+    else{sel.innerHTML=list.map(function(m){return '<option value="'+m.round+'">'+m.round+'. ford., '+esc(m.dt.slice(5,10).replace('-','.'))+'.: '+esc(m.home)+' – '+esc(m.away)+(m.manual?' (most: '+m.hg+':'+m.ag+'*)':'')+'</option>';}).join('');}
+    var has=!!getTok();$('e-token-box').hidden=has;$('e-forget').hidden=!has;}
+  $('e-forget').addEventListener('click',function(){setTok('');renderEnter();eStatus('A kulcs törölve erről a telefonról.');});
+  $('e-send').addEventListener('click',function(){
+    var us=$('e-us').value.trim(),them=$('e-them').value.trim(),rnd=$('e-match').value,tok=getTok()||$('e-token').value.trim();
+    if(!/^\d{1,2}$/.test(us)||!/^\d{1,2}$/.test(them)){eStatus('Add meg mindkét gólszámot.','err');return;}
+    if(!tok){eStatus('Add meg a beírási kulcsot.','err');return;}
+    var btn=$('e-send');btn.disabled=true;eStatus('Küldés…');
+    fetch('https://api.github.com/repos/'+S.repo+'/actions/workflows/update.yml/dispatches',{method:'POST',
+      headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+tok,'Content-Type':'application/json'},
+      body:JSON.stringify({ref:'main',inputs:{eredmeny:us+':'+them,fordulo:rnd}})})
+    .then(function(r){btn.disabled=false;
+      if(r.status===204){setTok(tok);
+        var m=S.matches.filter(function(x){return isOurs(x)&&String(x.round)===rnd;})[0];
+        if(m){var h=m.home===OUR;m.hg=+(h?us:them);m.ag=+(h?them:us);m.manual=true;renderTable();renderMatches();renderHero();}
+        renderEnter();$('e-us').value='';$('e-them').value='';
+        eStatus('Beküldve! Kb. 1–2 perc múlva mindenkinek frissül az oldal.','ok');toast('Eredmény beküldve');}
+      else if(r.status===401||r.status===403||r.status===404){setTok('');renderEnter();eStatus('A kulcs nem jó vagy lejárt ('+r.status+'). Kérj újat az admintól.','err');}
+      else eStatus('Nem sikerült ('+r.status+'). Próbáld újra kicsit később.','err');})
+    .catch(function(){btn.disabled=false;eStatus('Nincs kapcsolat. Próbáld újra.','err');});});
+
   var tabs=document.querySelectorAll('nav button');
   function showTab(n){tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===n?'true':'false');});document.querySelectorAll('section').forEach(function(s){s.hidden=s.id!=='tab-'+n;});if(n==='share')$('summary').value=buildSummary();}
   tabs.forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab);});});
@@ -196,7 +246,7 @@ textarea#import{min-height:140px;font-size:.85rem}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('Kimásolva – illeszd be Messengerben');}).catch(fb);}else fb();}
   $('copy-btn').addEventListener('click',function(){copyText($('summary').value);});
   $('share-btn').addEventListener('click',function(){var t=$('summary').value;if(navigator.share){navigator.share({text:t}).catch(function(err){if(!err||err.name!=='AbortError')copyText(t);});}else copyText(t);});
-  renderHero();renderTable();renderMatches();
+  renderHero();renderTable();renderMatches();renderEnter();
 })();
 </script>
 </body>

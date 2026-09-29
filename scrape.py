@@ -150,6 +150,7 @@ def main():
         "our": OUR_TEAM,
         "venue": VENUE,
         "source": URL,
+        "repo": os.environ.get("GITHUB_REPOSITORY", "apatijoci/redvipers"),
         "fetched": now.strftime("%Y-%m-%d %H:%M"),
         "matches": matches,
     }

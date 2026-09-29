@@ -28,6 +28,24 @@ Ezt a linket tedd ki a Messenger-csoportba.
 
 ## Eredmény beírása kézzel (meccs után azonnal)
 
+### A weboldalon (ajánlott)
+
+*Meccsek* fül → *Eredmény beírása*: kiválasztod a meccset, beírod a gólokat
+(Mi / Ellenfél), *Beküldés*. 1–2 perc múlva mindenkinek frissül az oldal.
+Első alkalommal egy **beírási kulcsot** kér, amit a telefon megjegyez.
+
+**Beírási kulcs létrehozása (admin, egyszer):**
+1. https://github.com/settings/personal-access-tokens/new (fine-grained token)
+2. Név: pl. `redvipers-eredmeny`, Expiration: pl. 1 év.
+3. *Repository access* → *Only select repositories* → `redvipers`.
+4. *Permissions* → *Repository permissions* → **Actions: Read and write**
+   (mást ne adj meg) → *Generate token*.
+5. A kapott `github_pat_...` kulcsot küldd el annak, aki eredményt írhat be.
+   Ezzel csak a frissítést lehet elindítani, a repó tartalmát nem tudja módosítani.
+   Ha kiszivárog, ugyanott törölhető (*Revoke*), és csinálhatsz újat.
+
+### A GitHubon
+
 1. A repó oldalán *Actions* → bal oldalt *Tabella frissítése* → *Run workflow*
    (telefonon böngészőből is megy).
 2. Az **eredmény** mezőbe a mi szemszögünkből írd: `MI:ŐK`, pl. `5:3`
