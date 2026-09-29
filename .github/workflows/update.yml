@@ -1,0 +1,27 @@
+name: Tabella frissítése
+
+on:
+  schedule:
+    - cron: "0 4 * * *"   # minden nap 04:00 UTC = reggel 6 (nyári idő) / 5 (téli idő)
+  workflow_dispatch:       # kézi indítás az Actions fülön
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Adatok lekérése és oldal generálása
+        run: python scrape.py
+      - name: Változás mentése
+        run: |
+          git config user.name "tabella-bot"
+          git config user.email "tabella-bot@users.noreply.github.com"
+          git add docs/index.html
+          git commit -m "Tabella frissítése $(date -u +'%Y-%m-%d')" || echo "Nincs változás"
+          git push
