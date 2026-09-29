@@ -10,6 +10,7 @@ from urllib.request import Request, urlopen
 URL = "https://kispalya.nyiregyhazisc.hu/eredmenyek/6"   # F csoport
 OUR_TEAM = "REDVIPERS"
 VENUE = "Városi Stadion, műfüves pályák"
+VOTE_URL = ""   # a "Ki jön?" szavazás Google Apps Script /exec linkje (üresen: nincs szavazás)
 MANUAL = "manual.json"   # kézzel beírt, még nem hivatalos eredmények
 TZ = ZoneInfo("Europe/Budapest")
 
@@ -150,6 +151,7 @@ def main():
         "our": OUR_TEAM,
         "venue": VENUE,
         "source": URL,
+        "vote": VOTE_URL,
         "repo": os.environ.get("GITHUB_REPOSITORY", "apatijoci/redvipers"),
         "fetched": now.strftime("%Y-%m-%d %H:%M"),
         "matches": matches,

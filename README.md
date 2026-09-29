@@ -61,6 +61,17 @@ hivatalos eredmény, az lép a kézi helyére, és a kézi bejegyzés törlődik
 (ha eltért, az Actions naplójában látszik). A kézi eredmények a `manual.json`
 fájlban vannak; ha azt közvetlenül szerkeszted, az oldal magától újragenerálódik.
 
+## „Ki jön?” szavazás
+
+A következő meccs alatt mindenki jelezheti: Jövök / Talán / Nem jövök.
+A szavazatok a Google Drive-on lévő **„Redvipers – ki jön?”** táblázatba kerülnek.
+
+- **Névsor**: a táblázat *Névsor* lapján, az A oszlopba (2. sortól) írd a neveket.
+  Ha üres, bárki szabadon beírhatja a nevét.
+- A szavazás meccsenként külön megy, a következő meccsre magától vált.
+- A táblázatot kiszolgáló kód: `szavazas/Code.gs` (Google Apps Script,
+  webes alkalmazásként közzétéve); a linkje a `scrape.py` `VOTE_URL` sorában van.
+
 ## Ha valami nem működik
 
 - **Piros X az Actions fülön, „Permission denied” / 403 hiba**:
