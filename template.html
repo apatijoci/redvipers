@@ -168,17 +168,19 @@ textarea#import{min-height:140px;font-size:.85rem}
     $('standings').innerHTML=h+'</tbody>';
     var me=rows.findIndex(function(r){return r.name===OUR;});
     $('subtitle').textContent='Nyíregyházi kispályás bajnokság, F csoport'+(me>=0?' · '+(me+1)+'. hely, '+rows[me].pts+' pont':'');
-    $('updated').textContent='Adatok a bajnokság oldaláról, lekérve: '+S.fetched;}
+    var nm=S.matches.filter(function(m){return m.manual;}).length;
+    $('updated').textContent='Adatok a bajnokság oldaláról, lekérve: '+S.fetched+(nm?' · '+nm+' kézzel beírt eredménnyel':'');}
   function renderMatches(){var only=$('only-ours').checked,list=S.matches.filter(function(m){return !only||isOurs(m);}).slice().sort(function(a,b){return b.round-a.round||((toDate(a.dt)||0)-(toDate(b.dt)||0));});
     var html='',cur=null;
     list.forEach(function(m){if(m.round!==cur){cur=m.round;html+='<div class="round">'+m.round+'. forduló</div>';}
       var cls='';if(isOurs(m)&&played(m)){var us=m.home===OUR?m.hg:m.ag,them=m.home===OUR?m.ag:m.hg;cls=us>them?'w':(us<them?'l':'');}
-      var sc=played(m)?m.hg+' – '+m.ag:'<span class="pend">'+(m.dt&&toDate(m.dt)<new Date()?'még nincs fent':'–')+'</span>';
+      var sc=played(m)?m.hg+' – '+m.ag+(m.manual?'*':''):'<span class="pend">'+(m.dt&&toDate(m.dt)<new Date()?'még nincs fent':'–')+'</span>';
       html+='<div class="match'+(isOurs(m)?' ours':'')+'"><span class="h'+(m.home===OUR?' me':'')+'">'+esc(m.home)+'</span><span class="sc '+cls+'">'+sc+'</span><span class="a'+(m.away===OUR?' me':'')+'">'+esc(m.away)+'</span><span class="meta">'+(m.dt?esc(m.dt.slice(5).replace('-','.')+'.')+' ':'nincs időpont · ')+esc(m.pitch)+' pálya</span></div>';});
+    if(list.some(function(m){return m.manual;}))html+='<p class="hint">* Kézzel beírt eredmény, a bajnokság oldalán még nincs fent. Amint a hivatalos megjelenik, az lép a helyére.</p>';
     $('match-list').innerHTML=html;}
   function buildSummary(){var L=[],rows=standings(),me=rows.findIndex(function(r){return r.name===OUR;});
     L.push('🐍 REDVIPERS – heti összesítő');L.push('Nyíregyházi kispályás bajnokság, F csoport');L.push('');
-    var last=lastOurs();if(last){var us=last.home===OUR?last.hg:last.ag,them=last.home===OUR?last.ag:last.hg;L.push((us>them?'✅':us<them?'❌':'🤝')+' Legutóbb ('+last.round+'. forduló): '+last.home+' '+last.hg+'–'+last.ag+' '+last.away);L.push('');}
+    var last=lastOurs();if(last){var us=last.home===OUR?last.hg:last.ag,them=last.home===OUR?last.ag:last.hg;L.push((us>them?'✅':us<them?'❌':'🤝')+' Legutóbb ('+last.round+'. forduló): '+last.home+' '+last.hg+'–'+last.ag+' '+last.away+(last.manual?' (még nem hivatalos)':''));L.push('');}
     L.push('📊 Tabella');rows.forEach(function(r,i){L.push((r.name===OUR?'👉 ':'')+(i+1)+'. '+r.name+' – '+r.pts+' p ('+r.p+' m, '+r.gf+':'+r.ga+')');});
     if(me>=0){L.push('');L.push('Jelenleg a '+(me+1)+'. helyen állunk, '+rows[me].pts+' ponttal.');}L.push('');
     var up=upcoming();if(up.length){var m=up[0];L.push('⚽ Következő meccs ('+m.round+'. forduló)');L.push('🆚 '+m.home+' – '+m.away);L.push('⏰ '+longDate(m.dt));L.push('📍 '+place(m));

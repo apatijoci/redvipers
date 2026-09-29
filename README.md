@@ -26,6 +26,23 @@ amit bárki megnyithat fiók nélkül.
 Innentől minden reggel (nyári időben 6-kor, téliben 5-kor) magától frissül.
 Ezt a linket tedd ki a Messenger-csoportba.
 
+## Eredmény beírása kézzel (meccs után azonnal)
+
+1. A repó oldalán *Actions* → bal oldalt *Tabella frissítése* → *Run workflow*
+   (telefonon böngészőből is megy).
+2. Az **eredmény** mezőbe a mi szemszögünkből írd: `MI:ŐK`, pl. `5:3`
+   (idegenbeli meccsnél is így, a script megfordítja).
+3. A **forduló** mező üresen hagyható: ilyenkor a legutóbbi, már elkezdődött
+   meccsünkhöz írja be. Régebbi meccshez add meg a forduló számát.
+4. Zöld *Run workflow* gomb. 1–2 perc múlva frissül az oldal; a kézi eredmény
+   csillaggal (*) jelenik meg, és beleszámít a tabellába.
+
+Elírtad? Futtasd újra a helyes eredménnyel, felülírja.
+Minden frissítéskor a script megnézi a bajnokság oldalát: ha ott már fent van a
+hivatalos eredmény, az lép a kézi helyére, és a kézi bejegyzés törlődik
+(ha eltért, az Actions naplójában látszik). A kézi eredmények a `manual.json`
+fájlban vannak; ha azt közvetlenül szerkeszted, az oldal magától újragenerálódik.
+
 ## Ha valami nem működik
 
 - **Piros X az Actions fülön, „Permission denied” / 403 hiba**:

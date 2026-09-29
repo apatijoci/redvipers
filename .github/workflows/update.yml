@@ -4,6 +4,21 @@ on:
   schedule:
     - cron: "0 4 * * *"   # minden nap 04:00 UTC = reggel 6 (nyári idő) / 5 (téli idő)
   workflow_dispatch:       # kézi indítás az Actions fülön
+    inputs:
+      eredmeny:
+        description: "Kézi eredmény a mi szemszögünkből, MI:ŐK (pl. 5:3). Üresen hagyva csak frissít."
+        required: false
+        default: ""
+      fordulo:
+        description: "Forduló száma (üresen: a legutóbbi, már elkezdődött meccsünk)"
+        required: false
+        default: ""
+  push:
+    paths: ["manual.json"] # ha a manual.json-t közvetlenül szerkeszted
+
+concurrency:
+  group: tabella           # két futás ne írja egyszerre az oldalt
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -18,10 +33,14 @@ jobs:
           python-version: "3.12"
       - name: Adatok lekérése és oldal generálása
         run: python scrape.py
+        env:
+          EREDMENY: ${{ inputs.eredmeny }}
+          FORDULO: ${{ inputs.fordulo }}
       - name: Változás mentése
         run: |
           git config user.name "tabella-bot"
           git config user.email "tabella-bot@users.noreply.github.com"
-          git add docs/index.html
+          git add docs/index.html manual.json
           git commit -m "Tabella frissítése $(date -u +'%Y-%m-%d')" || echo "Nincs változás"
+          git pull --rebase
           git push
