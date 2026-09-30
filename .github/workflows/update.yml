@@ -2,7 +2,10 @@ name: Tabella frissítése
 
 on:
   schedule:
-    - cron: "0 4 * * *"   # minden nap 04:00 UTC = reggel 6 (nyári idő) / 5 (téli idő)
+    # A GitHub az időzítést csak "legjobb szándékkal" tartja: kerek órakor gyakran késik vagy kimarad,
+    # ezért nem kerek percre tesszük, és van egy tartalék futás is (ha nincs változás, nem commitol).
+    - cron: "17 3 * * *"  # 03:17 UTC = reggel 5:17 (nyári idő) / 4:17 (téli idő)
+    - cron: "47 5 * * *"  # 05:47 UTC = reggel 7:47 (nyári idő) / 6:47 (téli idő) – tartalék
   workflow_dispatch:       # kézi indítás az Actions fülön
     inputs:
       eredmeny:

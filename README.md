@@ -23,7 +23,7 @@ amit bárki megnyithat fiók nélkül.
 6. **Első futtatás kipróbálása**: *Actions* fül → bal oldalt
    *Tabella frissítése* → *Run workflow*. Ha zöld pipát kapsz, kész.
 
-Innentől minden reggel (nyári időben 6-kor, téliben 5-kor) magától frissül.
+Innentől minden reggel magától frissül (nyári időben kb. 5:17-kor, egy tartalék futással 7:47-kor; téli időben egy órával korábban). A GitHub az időzített futásokat néha késve indítja.
 Ezt a linket tedd ki a Messenger-csoportba.
 
 ## Eredmény beírása kézzel (meccs után azonnal)
